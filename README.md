@@ -1,31 +1,126 @@
-# 🔍 Smart Documentation Search Engine
+# 🔍 Smart Documentation Search Engine (Hybrid RAG)
 
-An advanced, production-grade Hybrid Retrieval-Augmented Generation (RAG) pipeline built to accurately search and synthesize technical documentation.
+![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg)
+![LangChain](https://img.shields.io/badge/LangChain-Integration-green.svg)
+![AI](https://img.shields.io/badge/AI-Groq%20%7C%20Llama%203-orange.svg)
 
-## 🚀 Features
-* **Dual-Index Retrieval:** Combines sparse lexical search (BM25) for exact keyword matches and dense vector search (FAISS + `all-MiniLM-L6-v2`) for semantic understanding.
-* **Mathematical Rank Fusion:** Uses Reciprocal Rank Fusion (RRF) to merge disparate scoring scales.
-* **Cross-Encoder Reranking:** Employs `ms-marco-MiniLM-L-6-v2` to compute self-attention across query-document pairs for maximum context relevance.
-* **Hallucination Guardrails:** Strict zero-temperature LLM generation using Llama 3 with forced source-citation constraints.
-* **Decoupled Architecture:** Asynchronous FastAPI backend with a responsive HTML/JS vanilla frontend.
+An enterprise-grade **Hybrid Retrieval-Augmented Generation (RAG)** pipeline designed to accurately search, retrieve, and synthesize technical documentation. Built as a B.Tech Minor Project, this system guarantees zero-hallucination answers backed by precise source citations.
+
+---
+
+## 🚀 The Problem & Solution
+Standard search engines rely purely on exact keywords (missing contextual meaning), while standard Vector/Dense RAG pipelines often lose specific technical identifiers (like error codes or acronyms) in the embedding space.
+
+**The Solution:** This project implements a **two-stage Retrieve-and-Rerank architecture**:
+1. **Dual Retrieval:** Queries both a sparse lexical index (BM25) and a dense vector index (FAISS) simultaneously.
+2. **Mathematical Fusion:** Merges the incompatible score scales using Reciprocal Rank Fusion (RRF).
+3. **Neural Reranking:** Passes the fused candidates to a Cross-Encoder Transformer for deep token-level self-attention.
+4. **Grounded Synthesis:** Feeds the mathematically optimal context to an LLM with strict temperature controls to generate a deterministic, cited answer.
+
+---
+
+## ✨ Key Features
+* **Markdown-Aware Chunking:** Preserves document hierarchy and section headers as metadata instead of blindly slicing text.
+* **BM25 Sparse Index:** Optimizes for high-frequency keyword precision and exact code matching.
+* **FAISS Dense Index (`all-MiniLM-L6-v2`):** Enables sub-second semantic similarity search.
+* **Reciprocal Rank Fusion (RRF):** Non-parametric rank merging for hybrid search.
+* **Cross-Encoder Reranker (`ms-marco`):** Computes deep semantic relevance across query-document pairs.
+* **Glass-Box Web UI:** Custom FastAPI and Vanilla JS frontend that visualizes Cross-Encoder logits, RRF scores, and retrieved markdown context in real-time.
+
+---
 
 ## 🧠 System Architecture
-1. **Ingestion:** Markdown files are split using structure-aware chunking (preserving headers).
-2. **Retrieval:** $O(1)$ BM25 lookup + $O(\log N)$ FAISS L2 distance search.
-3. **Reranking:** Cross-encoder strictly reranks the top 10 candidates down to the top 3.
-4. **Generation:** Grounded context is passed to the LLM to synthesize the final cited answer.
+
+```text
+[ Raw Technical Docs (.md) ]
+             │
+             ▼
+[ MarkdownHeaderTextSplitter + Recursive Splitter ]
+             │
+     ┌───────┴──────────────────┐
+     ▼                          ▼
+[ FAISS Vector Store ]   [ BM25 Sparse Index ]
+(Dense Embeddings)       (Lexical TF-IDF)
+     │                          │
+     └───────┬──────────────────┘
+             ▼
+[ Reciprocal Rank Fusion (RRF: k=60) ]
+             │
+             ▼ 
+[ Cross-Encoder Reranker ] (Self-Attention Scoring)
+             │
+             ▼ (Top 3 Chunks)
+[ Groq LLM (Llama 3) with Strict Guardrail Prompt ]
+             │
+             ▼
+[ Cited, Hallucination-Free Answer + UI Inspector ]
+```
+---
 
 ## 🛠️ Tech Stack
-* **Backend:** Python, FastAPI, Uvicorn
-* **AI/ML:** LangChain, SentenceTransformers, FAISS, Rank_BM25, Groq API (Llama 3)
-* **Frontend:** HTML5, CSS3, Vanilla JavaScript
+-> Backend: Python, FastAPI, Uvicorn
+
+-> AI & NLP: LangChain, SentenceTransformers, FAISS, Rank_BM25, HuggingFace
+
+-> LLM Inference: Groq Cloud API (Llama 3 / 3.3)
+
+-> Frontend: HTML5, CSS3, Vanilla JavaScript
+
+---
 
 ## ⚙️ Quick Start (Local Setup)
+1. Clone the Repository
+```text
+git clone https://github.com/Mystifying7/hybrid_rag_project.git
+(https://github.com/Mystifying7/hybrid_rag_project.git)
+cd hybrid_rag_project
+```
+2. Set Up Virtual Environment
+```text
+python -m venv venv
+# On Windows:
+venv\Scripts\activate
+# On Mac/Linux:
+source venv/bin/activate
+```
+3. Install Dependencies
+```text
+pip install -r requirements.txt
+```
+4. Configure API Keys \
+Create a .env file in the root directory and add your Groq API key:
+```text
+GROQ_API_KEY=your_api_key_here
+```
+5. Add Sample Data \
+Place your Markdown (.md) documentation files inside the data/sample_docs/ directory. (Tip: Clone open-source repos like FastAPI's docs to test at scale!)
 
-1. **Clone and setup environment:**
-   ```bash
-   git clone <your-repo-url>
-   cd hybrid_rag_project
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
+6. Run the Server
+```text
+uvicorn server:app --reload
+```
+```text
+Open your browser and navigate to http://localhost:8000 to access the interactive search engine.
+```
+---
+## 📂 Project Structure
+```text
+hybrid_rag_project/
+├── data/
+│   └── sample_docs/         # Place markdown files here
+├── src/
+│   ├── ingestion.py         # Structure-aware document chunking
+│   ├── indexer.py           # FAISS and BM25 index builders
+│   ├── retriever.py         # RRF and Cross-Encoder logic
+│   └── generator.py         # LLM prompt synthesis & guardrails
+├── static/
+│   ├── index.html           # Product Landing Page
+|   ├── app.js 
+│   └── style.css            # Project styling
+├── server.py                # FastAPI routing and application state
+├── .env                     # Add you api key of grok here
+├── app.py
+├── requirements.txt         # Project dependencies
+└── README.md                # Project documentation
+```
