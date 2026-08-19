@@ -24,7 +24,7 @@ An advanced, production-grade Hybrid Retrieval-Augmented Generation (RAG) pipeli
 
 1. **Clone and setup environment:**
    ```bash
-   git clone <https://github.com/Mystifying7/hybrid_rag_project.git>
+   git clone https://github.com/Mystifying7/hybrid_rag_project.git
    cd hybrid_rag_project
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
