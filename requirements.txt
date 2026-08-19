@@ -1,0 +1,11 @@
+# requirements.txt
+sentence-transformers==2.5.1  # For dense embeddings and cross-encoder
+faiss-cpu==1.8.0              # Vector database for fast similarity search
+rank_bm25==0.2.2              # Sparse lexical scoring (TF-IDF variant)
+langchain==0.1.13             # For text splitting and LLM orchestration
+langchain-community==0.0.29
+groq==0.4.1                   # Fast LLM inference (or openai if you prefer)
+streamlit==1.32.2             # For our web UI
+PyMuPDF==1.23.26              # For reading PDFs (if needed later)
+python-dotenv==1.0.1          # For managing API keys securely
+jupyterlab==4.1.5             # For notebook experimentation
