@@ -18,10 +18,64 @@
     <!-- Marked.js for Markdown Rendering -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     
+    <!-- Favicon SVG -->
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    
     <!-- Application Stylesheet -->
     <link rel="stylesheet" href="/static/style.css">
-</head>
 <body>
+
+    <!-- Dynamic Parallax Scene with Floating Glass Frames -->
+    <div class="parallax-scene-container" id="parallaxScene">
+        <div class="parallax-image-bg" id="parallaxBg"></div>
+        <div class="ambient-glow-orb" id="ambientOrb"></div>
+        <div class="floating-frame floating-frame-1" id="frame1">
+            <div class="frame-decor-header">
+                <div class="frame-dot"></div>
+                <div class="frame-dot"></div>
+                <div class="frame-dot"></div>
+            </div>
+            <div class="frame-decor-body">
+                <div class="frame-line" style="width: 80%;"></div>
+                <div class="frame-line" style="width: 50%;"></div>
+                <div class="frame-line" style="width: 65%;"></div>
+            </div>
+        </div>
+        <div class="floating-frame floating-frame-2" id="frame2">
+            <div class="frame-decor-header">
+                <div class="frame-dot"></div>
+                <div class="frame-dot"></div>
+                <div class="frame-dot"></div>
+            </div>
+            <div class="frame-decor-body">
+                <div class="frame-line" style="width: 90%;"></div>
+                <div class="frame-line" style="width: 70%;"></div>
+                <div class="frame-line" style="width: 40%;"></div>
+            </div>
+        </div>
+        <div class="floating-frame floating-frame-3" id="frame3">
+            <div class="frame-decor-header">
+                <div class="frame-dot"></div>
+                <div class="frame-dot"></div>
+                <div class="frame-dot"></div>
+            </div>
+            <div class="frame-decor-body">
+                <div class="frame-line" style="width: 75%;"></div>
+                <div class="frame-line" style="width: 45%;"></div>
+            </div>
+        </div>
+        <div class="floating-frame floating-frame-4" id="frame4">
+            <div class="frame-decor-header">
+                <div class="frame-dot"></div>
+                <div class="frame-dot"></div>
+                <div class="frame-dot"></div>
+            </div>
+            <div class="frame-decor-body">
+                <div class="frame-line" style="width: 85%;"></div>
+                <div class="frame-line" style="width: 60%;"></div>
+            </div>
+        </div>
+    </div>
 
     <div class="app-container">
         
@@ -29,12 +83,7 @@
         <header class="navbar">
             <div class="brand-section" onclick="switchView('intro')">
                 <div class="brand-logo-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        <path d="M11 8v6"></path>
-                        <path d="M8 11h6"></path>
-                    </svg>
+                    <img src="/static/logo.svg" alt="Smart Documentation Search Logo" />
                 </div>
                 <div class="brand-info">
                     <h1>Smart Documentation Search</h1>
@@ -78,6 +127,9 @@
             
             <!-- Intro Hero Header -->
             <section class="intro-hero">
+                <div class="intro-logo-emblem">
+                    <img src="/static/logo.svg" alt="Smart Documentation Search Logo" class="hero-logo-img" />
+                </div>
                 <div class="intro-badge-pill">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                     Production Hybrid RAG Architecture

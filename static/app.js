@@ -42,7 +42,60 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     renderSearchHistory();
     setupMarkdownConfig();
+    initParallaxIllusion();
 });
+
+// Interactive Mouse Parallax & Moveable Background Illusion
+function initParallaxIllusion() {
+    const parallaxBg = document.getElementById('parallaxBg');
+    const ambientOrb = document.getElementById('ambientOrb');
+    const frame1 = document.getElementById('frame1');
+    const frame2 = document.getElementById('frame2');
+    const frame3 = document.getElementById('frame3');
+    const frame4 = document.getElementById('frame4');
+
+    if (!parallaxBg) return;
+
+    let targetX = 0, targetY = 0;
+    let currentX = 0, currentY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        targetX = (e.clientX - centerX) / centerX; // Range -1 to +1
+        targetY = (e.clientY - centerY) / centerY; // Range -1 to +1
+
+        if (ambientOrb) {
+            ambientOrb.style.left = `${e.clientX}px`;
+            ambientOrb.style.top = `${e.clientY}px`;
+        }
+    });
+
+    // Smooth 60fps interpolation render loop
+    function updateParallax() {
+        currentX += (targetX - currentX) * 0.05;
+        currentY += (targetY - currentY) * 0.05;
+
+        if (parallaxBg) {
+            parallaxBg.style.transform = `scale(1.05) translate3d(${currentX * 16}px, ${currentY * 16}px, 0)`;
+        }
+        if (frame1) {
+            frame1.style.transform = `translate3d(${-currentX * 36}px, ${-currentY * 36}px, 0) rotate(${currentX * 2.5}deg)`;
+        }
+        if (frame2) {
+            frame2.style.transform = `translate3d(${currentX * 42}px, ${currentY * 42}px, 0) rotate(${-currentY * 3}deg)`;
+        }
+        if (frame3) {
+            frame3.style.transform = `translate3d(${-currentX * 28}px, ${currentY * 22}px, 0)`;
+        }
+        if (frame4) {
+            frame4.style.transform = `translate3d(${currentX * 32}px, ${-currentY * 26}px, 0)`;
+        }
+
+        requestAnimationFrame(updateParallax);
+    }
+    updateParallax();
+}
 
 // Switch Between Intro Pitch Showcase and Live Search Engine
 function switchView(viewName) {
