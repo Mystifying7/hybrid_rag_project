@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Documentation Search Engine</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #3b82f6;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 30px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            color: var(--text-color);
+            margin-bottom: 5px;
+        }
+        header p {
+            color: var(--text-muted);
+        }
+        .search-box {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            outline: none;
+        }
+        input[type="text"]:focus {
+            border-color: var(--accent-color);
+        }
+        button {
+            padding: 14px 28px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover {
+            background-color: #2563eb;
+        }
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        @media(max-width: 768px) {
+            .results-grid { grid-template-columns: 1fr; }
+        }
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .card h3 {
+            margin-top: 0;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            color: #60a5fa;
+        }
+        .loader {
+            display: none;
+            text-align: center;
+            color: var(--accent-color);
+            font-weight: bold;
+            margin: 30px 0;
+            font-size: 18px;
+        }
+        pre {
+            background: #090d16;
+            padding: 12px;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 13px;
+            color: #38bdf8;
+            border: 1px solid var(--border-color);
+        }
+        .badge {
+            display: inline-block;
+            background: #334155;
+            color: #e2e8f0;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Smart Documentation Search Engine</h1>
+            <p>Hybrid RAG Pipeline: BM25 (Lexical) + Dense FAISS + Cross-Encoder Reranker</p>
+        </header>
+
+        <div class="search-box">
+            <input type="text" id="queryInput" placeholder="Ask a technical question (e.g., How do I upgrade the database?)..." />
+            <button onclick="executeSearch()">Search</button>
+        </div>
+
+        <div id="loader" class="loader">⚡ Querying hybrid pipeline and reranking candidate chunks...</div>
+
+        <div class="results-grid" id="resultsArea" style="display: none;">
+            <div class="card">
+                <h3>💡 Synthesized Answer</h3>
+                <div id="answerContent"></div>
+                <div id="sourcesContent"></div>
+            </div>
+            <div class="card">
+                <h3>🔬 Retrieved & Reranked Context</h3>
+                <div id="contextContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function executeSearch() {
+            const query = document.getElementById('queryInput').value.trim();
+            if (!query) return;
+
+            const loader = document.getElementById('loader');
+            const resultsArea = document.getElementById('resultsArea');
+            
+            loader.style.display = 'block';
+            resultsArea.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || 'Search failed');
+
+                // Render Answer
+                document.getElementById('answerContent').innerHTML = `<p>${data.answer.replace(/\n/g, '<br>')}</p>`;
+                
+                // Render Sources
+                let sourcesHtml = '';
+                if (data.sources && data.sources.length > 0) {
+                    sourcesHtml = `<div style="margin-top: 15px;"><strong>Cited Sources:</strong>`;
+                    data.sources.forEach(src => {
+                        sourcesHtml += `<br><span class="badge">📌 ${src}</span>`;
+                    });
+                    sourcesHtml += `</div>`;
+                }
+                document.getElementById('sourcesContent').innerHTML = sourcesHtml;
+
+                // Render Context Inspector Panel
+                let contextHtml = '';
+                data.retrieved_context.forEach((ctx, index) => {
+                    contextHtml += `
+                        <div style="margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px;">
+                            <strong>Rank ${index + 1} | Cross-Encoder Logit: ${ctx.cross_encoder_score}</strong><br>
+                            <small style="color: var(--text-muted);">Source: ${ctx.source} | Section: ${ctx.section}</small><br>
+                            <small style="color: var(--text-muted);">RRF Score: ${ctx.rrf_score}</small>
+                            <pre><code>${ctx.content}</code></pre>
+                        </div>
+                    `;
+                });
+                document.getElementById('contextContent').innerHTML = contextHtml;
+
+                resultsArea.style.display = 'grid';
+            } catch (err) {
+                alert('Error: ' + err.message);
+            } finally {
+                loader.style.display = 'none';
+            }
+        }
+
+        // Trigger search on Enter key press
+        document.getElementById('queryInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                executeSearch();
+            }
+        });
+    </script>
+</body>
+</html>
