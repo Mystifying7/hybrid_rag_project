@@ -98,10 +98,11 @@ Place your Markdown (.md) documentation files inside the data/sample_docs/ direc
 
 6. Run the Server
 ```text
-uvicorn server:app --reload
+python server.py
 ```
+Open your browser and go to : 
 ```text
-Open your browser and navigate to http://localhost:8000 to access the interactive search engine.
+http://localhost:8000 
 ```
 ---
 ## 📂 Project Structure
